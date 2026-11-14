@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3:15 PM Swing Scanner</title>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/vue@3.4.38/dist/vue.global.prod.js"></script>
+<style>
+:root{--bg:#eef1ee;--panel:#fff;--ink:#17262b;--mute:#62747a;--line:#d5dcd8;--acc:#0f6b62;--gain:#17803f;--loss:#b3382c}
+@media(prefers-color-scheme:dark){:root{--bg:#10191c;--panel:#17242a;--ink:#e6eeeb;--mute:#8da0a5;--line:#2a3b42;--acc:#4fc3b4;--gain:#58c785;--loss:#ee7a6d}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 'Schibsted Grotesk',system-ui,sans-serif}
+.wrap{display:grid;grid-template-columns:260px 1fr;gap:20px;max-width:1280px;margin:0 auto;padding:20px}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+aside,.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px}
+h1{font-size:26px;font-weight:800;margin:0 0 4px;letter-spacing:-.02em}h2{font-size:15px;margin:0 0 10px}
+.sub{color:var(--mute);margin:0 0 16px}
+label{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:7px 0;color:var(--mute);font-size:13px}
+input,select{width:90px;padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font:inherit}
+button{background:var(--acc);color:var(--bg);border:0;border-radius:4px;padding:10px 18px;font:600 15px inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,tr:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button:disabled{opacity:.6;cursor:wait}
+.bar{display:grid;grid-template-columns:110px 1fr 44px;align-items:center;gap:10px;margin:5px 0;font-size:13px}
+.bar i{display:block;height:10px;background:var(--acc);border-radius:2px;min-width:2px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}
+th{color:var(--mute);font-weight:600;font-size:12px}tr.row{cursor:pointer}tr.row:hover{background:var(--bg)}
+.scroll{overflow-x:auto}.g{color:var(--gain)}.l{color:var(--loss)}.m{color:var(--mute)}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 20px;text-align:left;padding:8px 4px}
+.err{color:var(--loss);margin:10px 0}.top{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.wl{margin-bottom:16px}.add{display:flex;gap:8px;margin-bottom:12px}.add input{flex:1;width:auto;padding:9px 10px}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid var(--line)}
+.pill.ok{color:var(--gain);border-color:var(--gain)}.rm{background:none;color:var(--loss);border:1px solid var(--line);padding:3px 9px;font-size:13px}
+.chk{display:flex;gap:8px}.chk b{min-width:14px}
+.spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+aside{position:sticky;top:16px;align-self:start}
+.sec{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:14px 0 2px;font-weight:600}
+.pill.warn{color:#8a5a00;background:#fff3d6;border-color:#e0a82e}
+@media(prefers-color-scheme:dark){.pill.warn{color:#f5c869;background:#3a2e12;border-color:#a7801f}}
+tr.near{background:rgba(224,168,46,.16);box-shadow:inset 4px 0 0 #e0a82e}
+tr.go{background:rgba(23,128,63,.13);box-shadow:inset 4px 0 0 var(--gain)}
+.tiles{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+.tile{border:1px solid var(--line);border-radius:6px;padding:6px 14px;font-size:12px;color:var(--mute)}.tile b{font-size:20px;display:block;line-height:1.2}
+.load{display:flex;gap:10px;align-items:center;padding:24px 0;color:var(--mute)}
+.pager{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:12px;font-size:13px}
+.pager button{padding:5px 11px;font-size:13px;background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+.pager button.cur{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+.b100{--c:#17803f}.b90{--c:#1f9a8a}.b80{--c:#2f7fc1}.b70{--c:#d19a12}.b60{--c:#e07a2b}.b50{--c:#c4566b}
+tr.band{background:color-mix(in srgb,var(--c) 14%,transparent);box-shadow:inset 4px 0 0 var(--c)}
+.pill.band{color:var(--c);border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+.chip{display:inline-flex;gap:6px;align-items:center;padding:3px 10px;border-radius:14px;border:1px solid var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);color:var(--ink);font:13px inherit}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--c)}.chip[aria-pressed=true]{background:var(--c);color:#fff}
+</style>
+</head>
+<body>
+<div id="app" class="wrap">
+  <aside>
+    <h1>3:15 PM Scanner</h1>
+    <p class="sub">Swing candidates from delivery %, closing strength and trend. NSE.</p>
+    <div class="sec">Data</div>
+    <label>Universe<select v-model="s.universe"><option value="nifty200">Nifty 200</option><option value="nifty500">Nifty 500</option></select></label>
+    <label>Data mode<select v-model="s.mode"><option value="live">3:15 PM live</option><option value="close">Post-close</option></select></label>
+    <label>Data delay (min)<input type="number" min="0" v-model.number="s.delay_min"></label>
+    <div class="sec">Screening</div>
+    <label>Min value (₹ cr)<input type="number" v-model.number="s.min_value_cr"></label>
+    <label>Min price (₹)<input type="number" v-model.number="s.min_price"></label>
+    <label>Min delivery %<input type="number" v-model.number="s.min_delivery"></label>
+    <div class="sec">Trend and trade plan</div>
+    <label>Supertrend period<input type="number" v-model.number="s.st_period"></label>
+    <label>Supertrend mult<input type="number" step=".5" v-model.number="s.st_mult"></label>
+    <label>ATR stop mult<input type="number" step=".1" v-model.number="s.atr_mult"></label>
+    <label>Min R:R<input type="number" step=".5" v-model.number="s.min_rr"></label>
+    <div class="sec">Extra indicators</div>
+    <label>RSI min<input type="number" v-model.number="s.rsi_min"></label>
+    <label>RSI max<input type="number" v-model.number="s.rsi_max"></label>
+    <label>ATR % min<input type="number" step=".5" v-model.number="s.atr_min"></label>
+    <label>ATR % max<input type="number" step=".5" v-model.number="s.atr_max"></label>
+    <div class="sec">Position sizing</div>
+    <label>Capital (₹)<input type="number" v-model.number="s.capital"></label>
+    <label>Risk per trade %<input type="number" step=".25" v-model.number="s.risk_pct"></label>
+    <label>Round-trip cost %<input type="number" step=".05" v-model.number="s.cost_pct"></label>
+  </aside>
+  <main>
+    <div class="card wl">
+      <h2>My watchlist <span class="m" v-if="watch.length">· {{ watch.length }} stocks, 50 per page</span></h2>
+      <div class="add">
+        <input v-model="newSyms" placeholder="Add NSE symbols, e.g. TCS, INFY, RELIANCE" aria-label="Add stocks" @keyup.enter="addStocks">
+        <button :disabled="!newSyms.trim()" @click="addStocks">Add</button>
+        <button class="rm" style="color:var(--ink)" :disabled="wlBusy" @click="refresh">Refresh page</button>
+      </div>
+      <p class="err" v-if="wlErr">{{ wlErr }}</p>
+      <p class="m" v-if="wlRow"><b>{{ info(wlRow).label }}</b> · {{ info(wlRow).age }} (fetched {{ wlFetched }} IST)</p>
+      <p class="m" v-if="!watch.length">No stocks yet. Add the ones you plan to trade and they stay here until you remove them.</p>
+      <template v-else>
+        <div class="tiles">
+          <label>Show<select v-model="bandFilter" style="width:180px"><option value="all">All stocks</option><option value="80+">80% and above</option><option value="100">100% only</option><option value="90">90 to 99%</option><option value="80">80 to 89%</option><option value="70">70 to 79%</option><option value="60">60 to 69%</option><option value="50">50 to 59%</option><option value="0">Below 50%</option></select></label>
+          <label>Sort<select v-model="sortBy" style="width:160px"><option value="mine">My order</option><option value="best">Highest score first</option></select></label>
+        </div>
+        <div class="chips"><button v-for="b in BANDS" :key="b" class="chip" :class="'b'+b" :aria-pressed="bandFilter===String(b)" @click="bandFilter = bandFilter===String(b) ? 'all' : String(b)"><i></i>{{ b }}% <b>{{ cnt[b] }}</b></button>
+          <span class="m" style="font-size:13px">on this page. Click a colour to filter.</span></div>
+        <p class="m" v-if="!wlBusy && !wlRows.length">No stocks on this page match this filter. Try another page or choose All stocks.</p>
+        <div class="load" v-if="wlBusy"><span class="spin"></span>Loading stocks {{ from }} to {{ to }}…</div>
+        <div class="scroll" v-show="!wlBusy"><table>
+          <thead><tr><th>Symbol</th><th>Close</th><th>Status</th><th>Entry</th><th>Stop</th><th>Target</th><th>Qty</th><th></th></tr></thead>
+          <tbody v-for="w in wlRows" :key="w.symbol">
+            <tr class="row" :class="band(w) ? ['band', 'b' + band(w)] : ''" tabindex="0" @click="wopen=wopen===w.symbol?null:w.symbol" @keyup.enter="wopen=wopen===w.symbol?null:w.symbol">
+              <td><b>{{ w.symbol }}</b></td><td>{{ w.close ?? '–' }}</td>
+              <td><span v-if="w.error" class="m">{{ w.error }}</span><span v-else class="pill" :class="band(w) ? ['band', 'b' + band(w)] : ''">{{ w.score }}% · {{ w.met }} of {{ w.total }}{{ w.ready ? ' · Ready' : '' }}</span></td>
+              <td>{{ w.plan?.entry ?? '–' }}</td><td class="l">{{ w.plan?.stop ?? '–' }}</td><td class="g">{{ w.plan?.target ?? '–' }}</td><td>{{ w.plan?.qty ?? '–' }}</td>
+              <td><button class="rm" @click.stop="removeStock(w.symbol)" :aria-label="'Remove '+w.symbol">Remove</button></td></tr>
+            <tr v-if="wopen===w.symbol && w.checks"><td colspan="8"><div class="why">
+              <div class="chk" v-for="k in w.checks" :key="k.name"><b :class="k.ok?'g':'l'">{{ k.ok ? '✓' : '✗' }}</b><span><b>{{ k.name }}.</b> {{ k.detail }} <span class="m">(weight {{ k.w }})</span></span></div>
+            </div></td></tr>
+          </tbody></table></div>
+        <pager :total="watch.length" :page="page" :size="PAGE" :busy="wlBusy" @go="goPage"></pager>
+      </template>
+    </div>
+    <div class="top">
+      <button :disabled="busy" @click="scan">{{ busy ? 'Scanning…' : 'Run scan' }}</button>
+      <div v-if="res"><b>{{ info(res).label }}</b> <span :class="info(res).stale ? 'l' : 'm'">· {{ info(res).age }}</span><br>
+        <small class="m">Fetched at {{ fetched }} IST · Delivery data: {{ res.delivery_date }} close</small></div>
+      <span class="m" v-else>No data fetched yet. Press Run scan.</span>
+    </div>
+    <p class="err" v-if="err">{{ err }}</p>
+    <div class="card" v-if="res" style="margin-bottom:16px">
+      <h2>Stocks left after each filter</h2>
+      <div class="bar" v-for="(n,k) in res.funnel" :key="k"><span>{{ k }}</span><i :style="{width: (n/res.funnel.Universe*100)+'%'}"></i><b>{{ n }}</b></div>
+    </div>
+    <div class="card" v-if="res">
+      <h2>{{ res.rows.length }} candidates</h2>
+      <p class="m" v-if="!res.rows.length">Nothing passed every filter today. Loosen delivery % or the liquidity floor, or try post-close mode.</p>
+      <div class="scroll" v-else><table>
+        <thead><tr><th>Symbol</th><th>Close</th><th>Delivery %</th><th>Avg 20d</th><th>Entry</th><th>Stop</th><th>Target</th><th>Net R:R</th><th>Qty</th><th>Score</th></tr></thead>
+        <tbody v-for="r in pagedRes" :key="r.symbol">
+          <tr class="row band" :class="'b' + Math.floor(r.score / 10) * 10" tabindex="0" @click="open=open===r.symbol?null:r.symbol" @keyup.enter="open=open===r.symbol?null:r.symbol">
+            <td><b>{{ r.symbol }}</b></td><td>{{ r.close }}</td><td class="g">{{ r.delivery }}</td><td class="m">{{ r.delivery_avg }}</td>
+            <td>{{ r.entry }}</td><td class="l">{{ r.stop }}</td><td class="g">{{ r.target }}</td><td>{{ r.net_rr }}</td><td>{{ r.qty }}</td><td><span class="pill band" :class="'b' + Math.floor(r.score / 10) * 10">{{ r.score }}%</span></td></tr>
+          <tr v-if="open===r.symbol"><td colspan="10"><div class="why">
+            <span>Delivery {{ r.delivery }}% vs {{ r.delivery_avg }}% average, on a green candle ({{ r.delivery_date }})</span>
+            <span>Closed in the top {{ 100 - r.close_pos }}% of the day's range, volume {{ r.vol_ratio }}x average</span>
+            <span>Close above 20 EMA {{ r.ema20 }} and 50 EMA {{ r.ema50 }}; Supertrend buy at {{ r.supertrend }}</span>
+            <span>ATR {{ r.atr_pct }}% of price; 20-day traded value ₹{{ r.value_cr }} cr</span>
+            <span>Gross R:R {{ r.rr }}; risk ₹{{ r.risk_amt }}; {{ s.resistance_lookback||60 }}-day high {{ r.resistance }}</span>
+            <span v-for="k in r.extras" :key="k.name"><b :class="k.ok?'g':'l'">{{ k.ok ? '✓' : '✗' }}</b> <b>{{ k.name }}.</b> {{ k.detail }}</span>
+          </div></td></tr>
+        </tbody></table></div>
+      <pager :total="res.rows.length" :page="resPage" :size="PAGE" :busy="false" @go="n => resPage = n"></pager>
+    </div>
+    <p class="m" style="margin-top:16px">For education only. Not financial advice.</p>
+  </main>
+</div>
+<script>
+const { createApp, ref, onMounted } = Vue;
+const Pager = { props: ['total', 'page', 'size', 'busy'], emits: ['go'],
+  computed: {
+    pages() { return Math.max(1, Math.ceil(this.total / this.size)); },
+    list() { const b = Math.min(this.pages, Math.max(1, this.page - 2) + 4), a = Math.max(1, b - 4); return Array.from({ length: b - a + 1 }, (_, i) => a + i); }
+  },
+  template: `<div class="pager" v-if="pages > 1"><span class="m">Showing {{ (page - 1) * size + 1 }} to {{ Math.min(page * size, total) }} of {{ total }}</span>
+    <span><button :disabled="busy || page <= 1" @click="$emit('go', page - 1)">‹ Prev</button>
+    <button v-for="n in list" :key="n" :class="{ cur: n === page }" :disabled="busy" @click="$emit('go', n)">{{ n }}</button>
+    <button :disabled="busy || page >= pages" @click="$emit('go', page + 1)">Next ›</button></span></div>` };
+createApp({ setup() {
+  const now = ref(Date.now()), fetched = ref(''), wlFetched = ref('');
+  setInterval(() => { now.value = Date.now(); }, 30000);
+  const newSyms = ref(''), watch = ref([]), wl = ref({}), wlErr = ref(''), wlBusy = ref(false), wopen = ref(null);
+  const s = ref({}), res = ref(null), busy = ref(false), err = ref(''), open = ref(null);
+  const PAGE = 50, page = ref(1), sortBy = ref('mine'), resPage = ref(1);
+  const wlRow = Vue.computed(() => Object.values(wl.value).find(w => w.price_date));
+  const pageSyms = Vue.computed(() => watch.value.slice((page.value - 1) * PAGE, page.value * PAGE));
+  const from = Vue.computed(() => (page.value - 1) * PAGE + 1);
+  const to = Vue.computed(() => Math.min(page.value * PAGE, watch.value.length));
+  const BANDS = [100, 90, 80, 70, 60, 50], bandFilter = ref('all');
+  const band = w => (w.error || w.score == null || w.score < 50) ? 0 : w.score >= 100 ? 100 : Math.floor(w.score / 10) * 10;
+  const wlAll = Vue.computed(() => pageSyms.value.map(sym => wl.value[sym] || { symbol: sym, error: 'Not loaded yet.' }));
+  const wlRows = Vue.computed(() => {
+    const f = bandFilter.value;
+    const rows = wlAll.value.filter(w => f === 'all' || (!w.error && (f === '80+' ? band(w) >= 80 : band(w) === Number(f))));
+    return sortBy.value === 'best' ? rows.slice().sort((a, b) => (b.score ?? -1) - (a.score ?? -1)) : rows;
+  });
+  const cnt = Vue.computed(() => { const c = { 0: 0 }; BANDS.forEach(b => c[b] = 0); wlAll.value.forEach(w => { if (!w.error) c[band(w)]++; }); return c; });
+  const pagedRes = Vue.computed(() => res.value ? res.value.rows.slice((resPage.value - 1) * PAGE, resPage.value * PAGE) : []);
+  const fmtTime = ms => new Date(ms).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true });
+  function info(o) {
+    if (!o || (!o.asof && !o.price_date)) return { label: 'Data time unknown', age: '', stale: false };
+    const live = !!o.asof;
+    const t = new Date(live ? o.asof.slice(0, 10) + 'T' + o.asof.slice(11, 16) + ':00+05:30' : o.price_date + 'T15:30:00+05:30');
+    const when = t.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+    const m = Math.max(0, Math.round((now.value - t) / 60000));
+    const age = m < 60 ? m + ' min old' : m < 1440 ? Math.floor(m / 60) + ' h ' + (m % 60) + ' min old' : Math.floor(m / 1440) + ' day(s) old';
+    return { label: (live ? 'Data as of ' : 'Last market close: ') + when + ' IST', age, stale: live && m > 30 };
+  }
+  async function loadPage() {  // analyses only the 50 stocks on the current page that are not loaded yet
+    const need = pageSyms.value.filter(sym => !wl.value[sym]);
+    if (!need.length) return;
+    wlBusy.value = true; wlErr.value = '';
+    try {
+      const r = await fetch('/api/watchlist/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ ...s.value, symbols: need }) });
+      if (!r.ok) throw new Error('Analysis failed (' + r.status + ').');
+      (await r.json()).forEach(w => { wl.value[w.symbol] = w; });
+      wlFetched.value = fmtTime(Date.now());
+    } catch (e) { wlErr.value = e.message; }
+    wlBusy.value = false;
+  }
+  async function goPage(n) { page.value = n; wopen.value = null; await loadPage(); }
+  async function refresh() { wl.value = {}; await loadPage(); }
+  async function addStocks() {
+    wlErr.value = '';
+    try {
+      const r = await fetch('/api/watchlist', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ symbols: newSyms.value }) });
+      const body = await r.json().catch(() => ({}));
+      if (r.ok) { watch.value = body; newSyms.value = ''; page.value = Math.ceil(body.length / PAGE); }
+      else {
+        wlErr.value = typeof body.detail === 'string' ? body.detail : 'Could not add the stock (server error ' + r.status + '). See the terminal running uvicorn.';
+        watch.value = await (await fetch('/api/watchlist')).json();
+      }
+    } catch (e) {
+      wlErr.value = 'Cannot reach the server. Open the app at http://localhost:8000 (not the index.html file) and keep uvicorn running.';
+    }
+    loadPage();
+  }
+  async function removeStock(sym) {
+    watch.value = await (await fetch('/api/watchlist/' + encodeURIComponent(sym), { method: 'DELETE' })).json();
+    delete wl.value[sym];
+    if (wopen.value === sym) wopen.value = null;
+    page.value = Math.min(page.value, Math.max(1, Math.ceil(watch.value.length / PAGE)));
+    loadPage();
+  }
+  onMounted(async () => {
+    s.value = await (await fetch('/api/defaults')).json();
+    watch.value = await (await fetch('/api/watchlist')).json();
+    loadPage();
+  });
+  async function scan() {
+    busy.value = true; err.value = ''; open.value = null; resPage.value = 1;
+    try {
+      const r = await fetch('/api/scan', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(s.value) });
+      if (!r.ok) throw new Error('Scan failed (' + r.status + '). Check the server log.');
+      res.value = await r.json();
+      fetched.value = fmtTime(Date.now());
+    } catch (e) { err.value = e.message; }
+    busy.value = false;
+  }
+  return { s, res, busy, err, open, scan, newSyms, watch, wlRows, wlRow, wlFetched, fetched, info, wlErr, wlBusy, wopen, addStocks, removeStock, refresh, page, sortBy, cnt, band, bandFilter, BANDS, from, to, goPage, resPage, pagedRes, PAGE };
+}}).component('pager', Pager).mount('#app');
+</script>
+</body>
+</html>
